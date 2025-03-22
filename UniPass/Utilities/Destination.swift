@@ -10,4 +10,5 @@ import Foundation
 enum Destination: Hashable {
     case profile
     case editprofile
+    case friendProfile(UserProfile)
 }

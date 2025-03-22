@@ -48,14 +48,16 @@ struct TagSelectionView: View {
 
             Spacer()
 
-            Button("Done") {
+            Button(action: {
                 dismiss()
+            }) {
+                Text("Done")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
             .padding(.horizontal)
         }
         .padding()

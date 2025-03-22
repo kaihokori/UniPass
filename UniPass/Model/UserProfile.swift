@@ -7,8 +7,9 @@
 
 import Foundation
 import CloudKit
+import UIKit
 
-struct UserProfile: Equatable {
+struct UserProfile: Equatable, Hashable {
     var uuid: String
     var name: String
     var studying: String
@@ -17,4 +18,6 @@ struct UserProfile: Equatable {
     var bio: String
     var hometown: String
     var socialScore: Int
+    var profileImage: UIImage?
+    var friends: [String]
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RootView: View {
     @State private var navigationPath = NavigationPath()
+    @EnvironmentObject var profileManager: ProfileManager
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -16,16 +17,14 @@ struct RootView: View {
                 .navigationDestination(for: Destination.self) { destination in
                     switch destination {
                     case .profile:
-                        ProfileView(navigationPath: $navigationPath)
+                        ProfileView(navigationPath: $navigationPath, profileToDisplay: profileManager.currentProfile)
                     case .editprofile:
                         EditProfileView(navigationPath: $navigationPath)
+                    case .friendProfile(let friend):
+                        ProfileView(navigationPath: $navigationPath, profileToDisplay: friend)
                     }
                 }
         }
         .ignoresSafeArea()
     }
-}
-
-#Preview {
-    RootView()
 }

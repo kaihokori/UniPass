@@ -19,25 +19,97 @@ struct EditProfileView: View {
     @State private var bio = ""
     @State private var hometown = ""
     @State private var showingTagSelector = false
+    @State private var showingImagePicker = false
+    @State private var selectedImageData: Data?
 
     var body: some View {
         ScrollView {
-            MapView(viewModel: locationViewModel, hometown: hometown)
-                .transition(.opacity)
-                .frame(height: 200)
-                .ignoresSafeArea()
-                .onChange(of: hometown, initial: true) { oldValue, newValue in
-                    guard !newValue.isEmpty else { return }
-                    locationViewModel.fetchCoordinates(for: newValue)
+            ZStack(alignment: .top) {
+                MapView(viewModel: locationViewModel, hometown: hometown)
+                    .transition(.opacity)
+                    .frame(height: 250)
+                    .onChange(of: hometown, initial: true) { oldValue, newValue in
+                        guard !newValue.isEmpty else { return }
+                        locationViewModel.fetchCoordinates(for: newValue)
+                    }
+                
+                HStack {
+                    Button {
+                        saveProfile()
+                        navigationPath.removeLast()
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .padding(12)
+                            .background(
+                                Circle()
+                                    .fill(Color(UIColor.systemGray6))
+                            )
+                    }
+                    .padding(.leading, 15)
+                    Spacer()
                 }
+                .offset(y: 60)
+                
+                if let imageData = selectedImageData, let selectedImage = UIImage(data: imageData) {
+                    Image(uiImage: selectedImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 130, height: 130)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .shadow(radius: 5)
+                        .offset(y: 175)
+                        .padding(.bottom, 20)
+                } else if let profileImage = profileManager.currentProfile?.profileImage {
+                    Image(uiImage: profileImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 130, height: 130)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .shadow(radius: 5)
+                        .offset(y: 175)
+                        .padding(.bottom, 20)
+                } else {
+                    Circle()
+                        .fill(Color.blue)
+                        .overlay(
+                            Text(String(profileManager.currentProfile?.name.prefix(1) ?? " "))
+                                .font(.title)
+                                .foregroundColor(.white)
+                        )
+                        .frame(width: 130, height: 130)
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .shadow(radius: 5)
+                        .offset(y: 175)
+                        .padding(.bottom, 20)
+                }
+            }
             
             VStack(alignment: .leading, spacing: 10) {
-                Text("About Me")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .padding(.top, 10)
+                HStack {
+                    Text("About Me")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        showingImagePicker = true
+                    }) {
+                        Label("Change Image", systemImage: "photo")
+                    }
+                    .padding(.horizontal, 15)
+                    .padding(.vertical, 10)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color(UIColor.systemGray6))
+                    )
+                }
+                .padding(.top, 10)
                 
                 styledLabeledField(label: "Name", text: $name)
+                
                 styledLabeledField(label: "Hometown", text: $hometown)
                 
                 VStack(alignment: .leading) {
@@ -53,7 +125,8 @@ struct EditProfileView: View {
 
                         TextEditor(text: $bio)
                             .font(.body)
-                            .background(Color.white)
+                            .scrollContentBackground(.hidden)
+                            .background(Color(UIColor.systemGray6))
                             .frame(minHeight: 200)
                     }
                 }
@@ -61,7 +134,7 @@ struct EditProfileView: View {
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(uiColor: .systemBackground))
+                        .fill(Color(UIColor.systemGray6))
                 )
                 
                 Text("Academics")
@@ -89,7 +162,7 @@ struct EditProfileView: View {
                                         .padding(.horizontal, 16)
                                         .background(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .fill(year == yearOption ? Color.blue : Color(UIColor.systemGray5))
+                                                .fill(year == yearOption ? Color.blue : Color(UIColor.systemBackground))
                                         )
                                         .foregroundColor(year == yearOption ? .white : .primary)
                                 }
@@ -97,12 +170,12 @@ struct EditProfileView: View {
                         }
                         .padding(.horizontal, 15)
                     }
-                    .padding(.vertical, 10)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(uiColor: .systemBackground))
-                    )
                 }
+                .padding(.vertical, 10)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color(UIColor.systemGray6))
+                )
                 
                 Text("My Interests")
                     .font(.title2)
@@ -134,7 +207,7 @@ struct EditProfileView: View {
                     .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(uiColor: .systemBackground))
+                            .fill(Color(UIColor.systemGray6))
                     )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -143,10 +216,13 @@ struct EditProfileView: View {
                 }
             }
             .padding(.horizontal)
+            .padding(.top, 60)
+            .padding(.bottom, 50)
         }
-        .navigationTitle("Edit Profile")
-        .navigationBarTitleDisplayMode(.inline)
+        .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
+        .navigationBarTitle("", displayMode: .inline)
+        .navigationBarHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button(action: {
@@ -169,7 +245,9 @@ struct EditProfileView: View {
                 hometown = profile.hometown
             }
         }
-        .background(Color(.systemGray6))
+        .sheet(isPresented: $showingImagePicker) {
+            ImagePicker(isPresented: $showingImagePicker, selectedImageData: $selectedImageData)
+        }
     }
 
     func styledLabeledField(label: String, text: Binding<String>) -> some View {
@@ -188,19 +266,27 @@ struct EditProfileView: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(uiColor: .systemBackground))
-                .shadow(color: Color.black.opacity(0.05), radius: 1, x: 0, y: 1)
+                .fill(Color(UIColor.systemGray6))
         )
     }
 
     func saveProfile() {
+        let imageToSave: UIImage?
+
+        if let selectedImageData = selectedImageData, let selectedImage = UIImage(data: selectedImageData) {
+            imageToSave = selectedImage
+        } else {
+            imageToSave = profileManager.currentProfile?.profileImage
+        }
+
         profileManager.updateProfile(
             name: name,
             studying: studying,
             year: year,
             tags: selectedTags,
             bio: bio,
-            hometown: hometown
+            hometown: hometown,
+            image: imageToSave
         )
     }
 }
