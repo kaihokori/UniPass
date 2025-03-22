@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct UniPassApp: App {
+    @StateObject var profileManager = ProfileManager.shared
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RootView()
+                .environmentObject(profileManager)
+                .ignoresSafeArea()
         }
     }
 }
