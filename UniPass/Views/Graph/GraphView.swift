@@ -216,7 +216,7 @@ struct GraphView: View {
     var isGraphAtDefaultPosition: Bool {
         abs(scale - 0.8) < 0.01
     }
-    
+
     var zoomAndPanGesture: some Gesture {
         MagnificationGesture()
             .onChanged { value in
@@ -226,23 +226,13 @@ struct GraphView: View {
 
     func profileNode(for profile: UserProfile, size: CGFloat) -> some View {
         let uuid = profile.uuid
-
-        // Determine if profile is showing
-        let isVisible: Bool = {
-            if uuid == profileManager.uuid {
-                return showMe
-            } else if visibleFirstDegreeUUIDs.contains(uuid) {
-                return true
-            } else if visibleSecondDegreeUUIDs.contains(uuid) {
-                return true
-            } else {
-                return false
-            }
-        }()
+        let isVisible = uuid == profileManager.uuid ||
+            visibleFirstDegreeUUIDs.contains(uuid) ||
+            visibleSecondDegreeUUIDs.contains(uuid)
 
         let isGoingToMeetup = profileManager.usersInMeetups.contains(uuid)
 
-        return VStack {
+        return Group {
             if let image = profile.profileImage {
                 #if os(iOS)
                 Image(uiImage: image)

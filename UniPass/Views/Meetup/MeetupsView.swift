@@ -49,7 +49,7 @@ struct MeetupsView: View {
                     .font(.headline)
             }
             .padding(.horizontal, 15)
-            .padding(.vertical)
+            .padding(.top)
             
             if meetups.isEmpty {
                 Text("No meetups yet!")
@@ -60,68 +60,34 @@ struct MeetupsView: View {
                     .foregroundColor(.secondary)
             } else {
                 ForEach(meetups) { meetup in
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Text(meetup.title)
-                                .font(.headline)
-                            Spacer()
-                            Text(meetup.date.formatted(.dateTime.month(.abbreviated).day().hour().minute()))
-                                .font(.subheadline)
-                        }
-                        Text(meetup.description)
-                            .font(.body)
-                        HStack {
-                            Spacer()
-                            Text(meetup.location)
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                            Spacer()
-                        }
-                        if meetup.participants.contains(profileManager.uuid) {
-                            Button(action: {
-                                if meetup.participants.count == 1 {
-                                    meetupToLeave = meetup
-                                    showDeleteWarning = true
-                                } else {
-                                    profileManager.leaveMeetup(meetup: meetup) { success in
-                                        if success { loadRelevantMeetups() }
-                                    }
+                    MeetupRowView(
+                        meetup: meetup,
+                        currentUserUUID: profileManager.uuid,
+                        getUserProfile: getUserProfile,
+                        onJoin: {
+                            profileManager.joinMeetup(meetup: meetup) { success, needsConfirmation in
+                                if success {
+                                    loadRelevantMeetups()
+                                } else if needsConfirmation {
+                                    meetupToJoin = meetup
+                                    showJoinWarning = true
                                 }
-                            }) {
-                                Text("Leave")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(10)
-                                    .background(Color.blue)
-                                    .foregroundColor(Color.white)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
-                        } else {
-                            Button(action: {
-                                profileManager.joinMeetup(meetup: meetup) { success, needsConfirmation in
-                                    if success {
-                                        loadRelevantMeetups()
-                                    } else if needsConfirmation {
-                                        meetupToJoin = meetup
-                                        showJoinWarning = true
-                                    }
+                        },
+                        onLeave: {
+                            if meetup.participants.count == 1 {
+                                meetupToLeave = meetup
+                                showDeleteWarning = true
+                            } else {
+                                profileManager.leaveMeetup(meetup: meetup) { success in
+                                    if success { loadRelevantMeetups() }
                                 }
-                            }) {
-                                Text("Join")
-                                    .frame(maxWidth: .infinity)
-                                    .padding(10)
-                                    .background(Color.blue)
-                                    .foregroundColor(Color.white)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
                             }
                         }
-                    }
+                    )
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 12).fill(AppColor.gray6))
-                    .padding(.horizontal)
-                    .frame(maxWidth: .infinity)
                 }
             }
-
             Spacer()
         }
         .onAppear {
@@ -172,5 +138,13 @@ struct MeetupsView: View {
         profileManager.fetchMeetups(for: allUUIDs) { fetched in
             self.meetups = fetched.sorted { $0.date < $1.date }
         }
+    }
+    
+    func getUserProfile(uuid: String) -> UserProfile? {
+        if uuid == profileManager.uuid {
+            return profileManager.currentProfile
+        }
+        return profileManager.friendsProfiles.first(where: { $0.uuid == uuid }) ??
+               profileManager.secondDegreeProfiles.first(where: { $0.uuid == uuid })
     }
 }

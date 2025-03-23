@@ -11,7 +11,7 @@ struct RippleBackgroundView: View {
     let rippleCount = 3
     let maxScale: CGFloat = 5.0
     let baseSize: CGFloat = 100
-    let rippleColor: Color = .blue
+    let rippleColor: Color = .accentColor
 
     @State private var isAnimating = true
 

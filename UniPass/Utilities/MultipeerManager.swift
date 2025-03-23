@@ -33,9 +33,6 @@ class MultipeerManager: NSObject, ObservableObject {
         session.delegate = self
         advertiser.delegate = self
         browser.delegate = self
-
-        advertiser.startAdvertisingPeer()
-        browser.startBrowsingForPeers()
     }
 
     private func sendMyUUID(to peerID: MCPeerID) {
@@ -84,4 +81,9 @@ extension MultipeerManager: MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
+    
+    func startScanning() {
+        advertiser.startAdvertisingPeer()
+        browser.startBrowsingForPeers()
+    }
 }

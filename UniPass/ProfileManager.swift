@@ -22,6 +22,7 @@ class ProfileManager: ObservableObject {
     @Published var nearbyProfiles: [UserProfile] = []
     @Published var shouldRefreshMeetups: Bool = false
     @Published var usersInMeetups: Set<String> = []
+    @Published var allFetchedMeetups: [Meetup] = []
     private var pendingFriendAdditions: [String] = []
     static let shared = ProfileManager()
 
@@ -44,17 +45,18 @@ class ProfileManager: ObservableObject {
     }
 
     private func loadOrCreateUUID() {
-        // 🔧 Manually set UUID for testing
-        let testUUID = "FE9CC396-EC8A-4AC2-A8DD-EAEB5276AB41"
-        uuid = testUUID
-        UserDefaults.standard.set(testUUID, forKey: uuidKey)
-        print("🧪 Using test UUID: \(uuid)")
-        
-        // Try fetching profile
-        fetchProfileFromCloudKit { success in
-            if !success {
-                self.createProfileInCloudKit()
-            }
+        // Testing: Reset UUID for
+        // UserDefaults.standard.removeObject(forKey: uuidKey)
+
+        if let savedUUID = UserDefaults.standard.string(forKey: uuidKey) {
+            uuid = savedUUID
+            print("Loaded existing UUID: \(uuid)")
+        } else {
+            let newUUID = UUID().uuidString
+            uuid = newUUID
+            UserDefaults.standard.set(newUUID, forKey: uuidKey)
+            print("Generated new UUID: \(uuid)")
+            createProfileInCloudKit()
         }
     }
 
@@ -700,7 +702,8 @@ class ProfileManager: ObservableObject {
 
                     self.currentMeetup = meetups.first(where: { $0.participants.contains(self.uuid) })
                     self.usersInMeetups = allParticipants // ✅
-
+                    self.allFetchedMeetups = meetups
+                    
                     completion(meetups)
 
                 case .failure(let error):

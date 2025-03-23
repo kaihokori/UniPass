@@ -15,6 +15,8 @@ struct ProfileView: View {
     @State private var hasGeocodedHometown = false
     @State private var lastGeocodedHometown: String = ""
     @State private var selectedTags: [String] = []
+    @State private var showDeleteWarning = false
+    @State private var meetupToLeave: Meetup?
     private let uuidKey = "userUUID"
     let profileToDisplay: UserProfile?
     var effectiveProfile: UserProfile? {
@@ -83,13 +85,16 @@ struct ProfileView: View {
                 .offset(y: 60)
                 
                 if let profile = effectiveProfile, let image = profile.profileImage {
+                    let isGoingToMeetup = profileManager.currentMeetup?.participants.contains(profile.uuid) ?? false
                     #if os(iOS)
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
                         .frame(width: 130, height: 130)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .overlay(
+                            Circle().stroke(isGoingToMeetup ? Color.purple : Color.white, lineWidth: 4)
+                        )
                         .shadow(radius: 5)
                         .offset(y: 165)
                     #else
@@ -98,7 +103,9 @@ struct ProfileView: View {
                         .scaledToFill()
                         .frame(width: 130, height: 130)
                         .clipShape(Circle())
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .overlay(
+                            Circle().stroke(isGoingToMeetup ? Color.purple : Color.white, lineWidth: 4)
+                        )
                         .shadow(radius: 5)
                         .offset(y: 165)
                     #endif
@@ -144,12 +151,53 @@ struct ProfileView: View {
                         .padding(.horizontal, 50)
                     
                     if !profile.studying.isEmpty && !profile.year.isEmpty {
-                        Text("\(profile.studying) - \(profile.year) Year")
+                        Text("\(profile.year) Year")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 50)
+                        Text(profile.studying)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .padding(.horizontal, 50)
                     }
                     
+                    if let meetup = profileManager.allFetchedMeetups.first(where: { $0.participants.contains(profile.uuid) }) {
+                        MeetupRowView(
+                            meetup: meetup,
+                            currentUserUUID: profileManager.uuid,
+                            getUserProfile: { uuid in
+                                if uuid == profileManager.uuid {
+                                    return profileManager.currentProfile
+                                }
+                                return profileManager.friendsProfiles.first(where: { $0.uuid == uuid }) ??
+                                       profileManager.secondDegreeProfiles.first(where: { $0.uuid == uuid })
+                            },
+                            onJoin: {
+                                profileManager.joinMeetup(meetup: meetup) { success, _ in
+                                    if success {
+                                        profileManager.fetchMeetups(
+                                            for: [profileManager.uuid, profile.uuid]
+                                        ) { _ in }
+                                    }
+                                }
+                            },
+                            onLeave: {
+                                if meetup.participants.count == 1 {
+                                    meetupToLeave = meetup
+                                    showDeleteWarning = true
+                                } else {
+                                    profileManager.leaveMeetup(meetup: meetup) { success in
+                                        if success {
+                                            profileManager.fetchMeetups(
+                                                for: [profileManager.uuid, profile.uuid]
+                                            ) { _ in }
+                                        }
+                                    }
+                                }
+                            }
+                        )
+                    }
+
                     VStack(alignment: .leading) {
                         if !profile.bio.isEmpty {
                             Text("Bio: \(profile.bio)")
@@ -196,6 +244,11 @@ struct ProfileView: View {
                 if profile.uuid == profileManager.uuid {
                     profileManager.fetchProfileFromCloudKit()
                 }
+
+                if profileManager.allFetchedMeetups.isEmpty {
+                    let relevantUUIDs = [profileManager.uuid] + profileManager.friendsProfiles.map { $0.uuid }
+                    profileManager.fetchMeetups(for: relevantUUIDs) { _ in }
+                }
             }
         }
         .onChange(of: effectiveProfile?.hometown) { oldValue, newValue in
@@ -209,6 +262,18 @@ struct ProfileView: View {
         .navigationBarHidden(true)
         #endif
         .background(AppColor.systemBackground)
+        .alert("Leave Meetup?", isPresented: $showDeleteWarning, presenting: meetupToLeave) { meetup in
+            Button("Delete Meetup", role: .destructive) {
+                profileManager.leaveMeetup(meetup: meetup) { success in
+                    if success {
+                        profileManager.fetchMeetups(for: [profileManager.uuid]) { _ in }
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { meetup in
+            Text("You're the last one going to \"\(meetup.title)\". Leaving will delete the meetup.")
+        }
     }
     
     private func triggerGeocodingIfNeeded() {

@@ -59,7 +59,7 @@ struct InteractionView: View {
                             myTags: Set(profileManager.currentProfile?.tags ?? []),
                             onTap: {
                                 navigationPath.append(Destination.friendProfile(record.user))
-                            }
+                            }, goingToMeetup: profileManager.currentMeetup?.participants.contains(record.user.uuid) ?? false
                         )
                         .padding(.horizontal)
                     }
@@ -78,7 +78,7 @@ struct InteractionView: View {
                                 myTags: Set(profileManager.currentProfile?.tags ?? []),
                                 onTap: {
                                     navigationPath.append(Destination.friendProfile(profile))
-                                }
+                                }, goingToMeetup: profileManager.currentMeetup?.participants.contains(profile.uuid) ?? false
                             )
                             .padding(.horizontal)
                         }

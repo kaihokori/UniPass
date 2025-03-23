@@ -65,7 +65,7 @@ struct TagWrapperView: View {
                 .padding(.horizontal, 12)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(selectedTags.contains(tag) ? Color.blue : AppColor.gray5)
+                        .fill(selectedTags.contains(tag) ? Color.accentColor : AppColor.gray5)
                 )
                 .foregroundColor(selectedTags.contains(tag) ? .white : Color.primary)
         }

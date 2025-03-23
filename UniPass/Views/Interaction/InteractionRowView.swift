@@ -13,6 +13,7 @@ struct InteractionRowView: View {
     let date: Date?
     let myTags: Set<String>
     let onTap: () -> Void
+    let goingToMeetup: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -24,17 +25,29 @@ struct InteractionRowView: View {
                             .resizable()
                             .frame(width: 40, height: 40)
                             .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(goingToMeetup ? Color.purple : Color.clear, lineWidth: 3)
+                            )
                         #else
                         Image(nsImage: image)
                             .resizable()
                             .frame(width: 40, height: 40)
                             .clipShape(Circle())
+                            .overlay(
+                                Circle()
+                                    .stroke(goingToMeetup ? Color.purple : Color.clear, lineWidth: 3)
+                            )
                         #endif
                     } else {
                         Circle()
                             .fill(Color.green)
                             .frame(width: 40, height: 40)
                             .overlay(Text(profile.name.prefix(1)).foregroundColor(.white))
+                            .overlay(
+                                Circle()
+                                    .stroke(goingToMeetup ? Color.purple : Color.clear, lineWidth: 3)
+                            )
                     }
 
                     VStack(alignment: .leading) {
@@ -87,7 +100,7 @@ struct InteractionRowView: View {
                     .padding(.horizontal, 8)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(myTags.contains(tag) ? Color.blue : AppColor.gray5)
+                            .fill(myTags.contains(tag) ? Color.accentColor : AppColor.gray5)
                     )
                     .foregroundColor(myTags.contains(tag) ? .white : .primary)
             }

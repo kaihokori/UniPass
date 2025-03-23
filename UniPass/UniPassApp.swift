@@ -15,17 +15,25 @@ struct UniPassApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(profileManager)
-                .environmentObject(multipeerManager)
-                .environmentObject(discoveredManager)
-                .onChange(of: multipeerManager.discoveredUUIDs) {
-                    for uuid in multipeerManager.discoveredUUIDs {
-                        discoveredManager.handleNewUUID(uuid)
-                        profileManager.addFriendIfNeeded(uuid: uuid)
+            if UserDefaults.standard.bool(forKey: "hasSeenOnboarding") {
+                RootView()
+                    .environmentObject(profileManager)
+                    .environmentObject(multipeerManager)
+                    .environmentObject(discoveredManager)
+                    .onChange(of: multipeerManager.discoveredUUIDs) {
+                        for uuid in multipeerManager.discoveredUUIDs {
+                            discoveredManager.handleNewUUID(uuid)
+                            profileManager.addFriendIfNeeded(uuid: uuid)
+                        }
                     }
-                }
-                .ignoresSafeArea()
+                    .ignoresSafeArea()
+            } else {
+                OnboardingView()
+                    .environmentObject(profileManager)
+                    .environmentObject(multipeerManager)
+                    .environmentObject(discoveredManager)
+                    .ignoresSafeArea()
+            }
         }
     }
 }

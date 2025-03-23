@@ -214,7 +214,7 @@ struct EditProfileView: View {
                                         .padding(.horizontal, 16)
                                         .background(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .fill(year == yearOption ? Color.blue : AppColor.systemBackground)
+                                                .fill(year == yearOption ? Color.accentColor : AppColor.systemBackground)
                                         )
                                         .foregroundColor(year == yearOption ? .white : .primary)
                                 }

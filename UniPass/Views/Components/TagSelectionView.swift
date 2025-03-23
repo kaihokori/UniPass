@@ -54,7 +54,7 @@ struct TagSelectionView: View {
                 Text("Done")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue)
+                    .background(Color.accentColor)
                     .foregroundColor(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
             }
