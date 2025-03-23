@@ -11,4 +11,7 @@ enum Destination: Hashable {
     case profile
     case editprofile
     case friendProfile(UserProfile)
+    case meetups
+    case createMeetup
+    case interaction
 }

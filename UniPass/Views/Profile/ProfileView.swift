@@ -17,11 +17,21 @@ struct ProfileView: View {
     @State private var selectedTags: [String] = []
     private let uuidKey = "userUUID"
     let profileToDisplay: UserProfile?
+    var effectiveProfile: UserProfile? {
+        if let display = profileToDisplay {
+            if display.uuid == profileManager.uuid {
+                return profileManager.friendsProfiles.first(where: { $0.uuid == profileManager.uuid }) ?? profileManager.currentProfile
+            } else {
+                return display
+            }
+        }
+        return profileManager.currentProfile
+    }
 
     var body: some View {
         ScrollView {
             ZStack(alignment: .top) {
-                if let profile = profileToDisplay {
+                if let profile = effectiveProfile {
                     if locationViewModel.coordinate != nil {
                         MapView(viewModel: locationViewModel, hometown: profile.hometown)
                             .transition(.opacity)
@@ -48,11 +58,11 @@ struct ProfileView: View {
                             .padding(12)
                             .background(
                                 Circle()
-                                    .fill(Color(UIColor.systemGray6))
+                                    .fill(AppColor.gray6)
                             )
                     }
                     Spacer()
-                    if let profile = profileToDisplay {
+                    if let profile = effectiveProfile {
                         if let localUUID = UserDefaults.standard.string(forKey: uuidKey),
                            localUUID == profile.uuid {
                             Button {
@@ -63,7 +73,7 @@ struct ProfileView: View {
                                     .padding(.vertical, 8)
                                     .background(
                                         RoundedRectangle(cornerRadius: 20)
-                                            .fill(Color(UIColor.systemGray6))
+                                            .fill(AppColor.gray6)
                                     )
                             }
                         }
@@ -72,7 +82,8 @@ struct ProfileView: View {
                 .padding(.horizontal, 15)
                 .offset(y: 60)
                 
-                if let profile = profileToDisplay, let image = profile.profileImage {
+                if let profile = effectiveProfile, let image = profile.profileImage {
+                    #if os(iOS)
                     Image(uiImage: image)
                         .resizable()
                         .scaledToFill()
@@ -81,9 +92,19 @@ struct ProfileView: View {
                         .overlay(Circle().stroke(Color.white, lineWidth: 2))
                         .shadow(radius: 5)
                         .offset(y: 165)
+                    #else
+                    Image(nsImage: image)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 130, height: 130)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .shadow(radius: 5)
+                        .offset(y: 165)
+                    #endif
                 } else {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(Color.green)
                         .overlay(
                             Text(String(profileManager.currentProfile?.name.prefix(1) ?? " "))
                                 .font(.title)
@@ -97,7 +118,7 @@ struct ProfileView: View {
             }
             
             VStack {
-                if let profile = profileToDisplay {
+                if let profile = effectiveProfile {
                     HStack {
                         if !profile.hometown.isEmpty {
                             Label("\(profile.hometown)", systemImage: "house")
@@ -109,7 +130,7 @@ struct ProfileView: View {
                         Spacer()
                         
                         VStack(alignment: .trailing) {
-                            Label("\(profile.socialScore)", systemImage: "star")
+                            Label("\(profile.socialScore)", systemImage: "person")
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         }
@@ -155,32 +176,43 @@ struct ProfileView: View {
         }
         .ignoresSafeArea()
         .onAppear {
-            if let profile = profileToDisplay, !profile.hometown.isEmpty {
-                if profile.hometown != lastGeocodedHometown || locationViewModel.coordinate == nil {
-                    print("🌍 [onAppear] Geocoding hometown: \(profile.hometown)")
-                    locationViewModel.coordinate = nil
-                    locationViewModel.fetchCoordinates(for: profile.hometown)
-                    lastGeocodedHometown = profile.hometown
+            if let profile = effectiveProfile {
+                if profile.uuid != profileManager.uuid,
+                   let myTags = profileManager.currentProfile?.tags {
+                    selectedTags = profile.tags.filter { myTags.contains($0) }
+                } else {
+                    selectedTags = []
+                }
+
+                if !profile.hometown.isEmpty {
+                    if profile.hometown != lastGeocodedHometown || locationViewModel.coordinate == nil {
+                        print("🌍 [onAppear] Geocoding hometown: \(profile.hometown)")
+                        locationViewModel.coordinate = nil
+                        locationViewModel.fetchCoordinates(for: profile.hometown)
+                        lastGeocodedHometown = profile.hometown
+                    }
+                }
+
+                if profile.uuid == profileManager.uuid {
+                    profileManager.fetchProfileFromCloudKit()
                 }
             }
-
-            if profileToDisplay?.uuid == profileManager.uuid {
-                profileManager.fetchProfileFromCloudKit()
-            }
         }
-        .onChange(of: profileToDisplay?.hometown) { oldValue, newValue in
+        .onChange(of: effectiveProfile?.hometown) { oldValue, newValue in
             if oldValue != newValue {
                 triggerGeocodingIfNeeded()
             }
         }
         .navigationBarBackButtonHidden(true)
+        #if os(iOS)
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
-        .background(Color(.systemBackground))
+        #endif
+        .background(AppColor.systemBackground)
     }
     
     private func triggerGeocodingIfNeeded() {
-        guard let profile = profileToDisplay,
+        guard let profile = effectiveProfile,
               !profile.hometown.isEmpty else { return }
 
         if profile.hometown != lastGeocodedHometown || locationViewModel.coordinate == nil {

@@ -21,28 +21,43 @@ struct EditProfileView: View {
     @State private var showingTagSelector = false
     @State private var showingImagePicker = false
     @State private var selectedImageData: Data?
+    @State private var showValidationAlert = false
+    @State private var validationMessage = ""
+    @FocusState private var isBioFocused: Bool
+    #if os(iOS)
+    @StateObject private var keyboard = KeyboardResponder()
+    #endif
 
     var body: some View {
         ScrollView {
             ZStack(alignment: .top) {
-                MapView(viewModel: locationViewModel, hometown: hometown)
-                    .transition(.opacity)
-                    .frame(height: 250)
-                    .onChange(of: hometown, initial: true) { oldValue, newValue in
-                        guard !newValue.isEmpty else { return }
-                        locationViewModel.fetchCoordinates(for: newValue)
-                    }
+                if hometown.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    Rectangle()
+                        .fill(AppColor.gray5)
+                        .frame(height: 250)
+                        .overlay(
+                            Text("Add your hometown to show location")
+                                .foregroundColor(.secondary)
+                                .font(.body)
+                        )
+                } else {
+                    MapView(viewModel: locationViewModel, hometown: hometown)
+                        .transition(.opacity)
+                        .frame(height: 250)
+                        .onChange(of: hometown, initial: true) { oldValue, newValue in
+                            locationViewModel.fetchCoordinates(for: newValue)
+                        }
+                }
                 
                 HStack {
                     Button {
                         saveProfile()
-                        navigationPath.removeLast()
                     } label: {
                         Image(systemName: "chevron.left")
                             .padding(12)
                             .background(
                                 Circle()
-                                    .fill(Color(UIColor.systemGray6))
+                                    .fill(AppColor.gray6)
                             )
                     }
                     .padding(.leading, 15)
@@ -50,7 +65,8 @@ struct EditProfileView: View {
                 }
                 .offset(y: 60)
                 
-                if let imageData = selectedImageData, let selectedImage = UIImage(data: imageData) {
+                if let imageData = selectedImageData, let selectedImage = PlatformImage(data: imageData) {
+                    #if os(iOS)
                     Image(uiImage: selectedImage)
                         .resizable()
                         .scaledToFill()
@@ -60,7 +76,20 @@ struct EditProfileView: View {
                         .shadow(radius: 5)
                         .offset(y: 175)
                         .padding(.bottom, 20)
+                    #else
+                    Image(nsImage: selectedImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 130, height: 130)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .shadow(radius: 5)
+                        .offset(y: 175)
+                        .padding(.bottom, 20)
+                    #endif
+
                 } else if let profileImage = profileManager.currentProfile?.profileImage {
+                    #if os(iOS)
                     Image(uiImage: profileImage)
                         .resizable()
                         .scaledToFill()
@@ -70,9 +99,21 @@ struct EditProfileView: View {
                         .shadow(radius: 5)
                         .offset(y: 175)
                         .padding(.bottom, 20)
+                    #else
+                    Image(nsImage: profileImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 130, height: 130)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .shadow(radius: 5)
+                        .offset(y: 175)
+                        .padding(.bottom, 20)
+                    #endif
+
                 } else {
                     Circle()
-                        .fill(Color.blue)
+                        .fill(Color.green)
                         .overlay(
                             Text(String(profileManager.currentProfile?.name.prefix(1) ?? " "))
                                 .font(.title)
@@ -103,7 +144,7 @@ struct EditProfileView: View {
                     .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(UIColor.systemGray6))
+                            .fill(AppColor.gray5)
                     )
                 }
                 .padding(.top, 10)
@@ -124,17 +165,28 @@ struct EditProfileView: View {
                         }
 
                         TextEditor(text: $bio)
+                            .focused($isBioFocused)
                             .font(.body)
                             .scrollContentBackground(.hidden)
-                            .background(Color(UIColor.systemGray6))
+                            .background(AppColor.gray6)
                             .frame(minHeight: 200)
+                            .toolbar {
+                                ToolbarItemGroup(placement: .keyboard) {
+                                    if isBioFocused {
+                                        Spacer()
+                                        Button("Done") {
+                                            isBioFocused = false
+                                        }
+                                    }
+                                }
+                            }
                     }
                 }
                 .padding(.horizontal, 15)
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(UIColor.systemGray6))
+                        .fill(AppColor.gray6)
                 )
                 
                 Text("Academics")
@@ -162,7 +214,7 @@ struct EditProfileView: View {
                                         .padding(.horizontal, 16)
                                         .background(
                                             RoundedRectangle(cornerRadius: 20)
-                                                .fill(year == yearOption ? Color.blue : Color(UIColor.systemBackground))
+                                                .fill(year == yearOption ? Color.blue : AppColor.systemBackground)
                                         )
                                         .foregroundColor(year == yearOption ? .white : .primary)
                                 }
@@ -174,7 +226,7 @@ struct EditProfileView: View {
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color(UIColor.systemGray6))
+                        .fill(AppColor.gray6)
                 )
                 
                 Text("My Interests")
@@ -207,7 +259,7 @@ struct EditProfileView: View {
                     .padding(.vertical, 10)
                     .background(
                         RoundedRectangle(cornerRadius: 12)
-                            .fill(Color(UIColor.systemGray6))
+                            .fill(AppColor.gray6)
                     )
                 }
                 .buttonStyle(PlainButtonStyle())
@@ -219,22 +271,16 @@ struct EditProfileView: View {
             .padding(.top, 60)
             .padding(.bottom, 50)
         }
+        #if os(iOS)
+        .padding(.bottom, keyboard.currentHeight)
+        .animation(.easeOut(duration: 0.25), value: keyboard.currentHeight)
+        #endif
         .ignoresSafeArea()
         .navigationBarBackButtonHidden(true)
+        #if os(iOS)
         .navigationBarTitle("", displayMode: .inline)
         .navigationBarHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button(action: {
-                    saveProfile()
-                    navigationPath.removeLast()
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 18, weight: .medium))
-                        .foregroundColor(.primary)
-                }
-            }
-        }
+        #endif
         .onAppear {
             if let profile = profileManager.currentProfile {
                 name = profile.name
@@ -247,6 +293,9 @@ struct EditProfileView: View {
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(isPresented: $showingImagePicker, selectedImageData: $selectedImageData)
+        }
+        .alert(isPresented: $showValidationAlert) {
+            Alert(title: Text("Missing Information"), message: Text(validationMessage), dismissButton: .default(Text("OK")))
         }
     }
 
@@ -266,14 +315,50 @@ struct EditProfileView: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor.systemGray6))
+                .fill(AppColor.gray6)
         )
     }
 
     func saveProfile() {
-        let imageToSave: UIImage?
+        if name.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter your name."
+            showValidationAlert = true
+            return
+        }
+        
+        if hometown.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter your hometown."
+            showValidationAlert = true
+            return
+        }
 
-        if let selectedImageData = selectedImageData, let selectedImage = UIImage(data: selectedImageData) {
+        if bio.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please enter your bio."
+            showValidationAlert = true
+            return
+        }
+
+        if studying.trimmingCharacters(in: .whitespaces).isEmpty {
+            validationMessage = "Please specify what you're studying."
+            showValidationAlert = true
+            return
+        }
+
+        if year.isEmpty {
+            validationMessage = "Please select your year."
+            showValidationAlert = true
+            return
+        }
+
+        if selectedTags.isEmpty {
+            validationMessage = "Please select at least one tag."
+            showValidationAlert = true
+            return
+        }
+
+        let imageToSave: PlatformImage?
+
+        if let selectedImageData = selectedImageData, let selectedImage = PlatformImage(data: selectedImageData) {
             imageToSave = selectedImage
         } else {
             imageToSave = profileManager.currentProfile?.profileImage
@@ -288,5 +373,7 @@ struct EditProfileView: View {
             hometown: hometown,
             image: imageToSave
         )
+        
+        navigationPath.removeLast()
     }
 }

@@ -10,9 +10,22 @@
 		DCDCD5D42D8DD28400C041C1 /* UniPass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UniPass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		DCAE89922D8F400C005CD862 /* Exceptions for "UniPass" folder in "UniPass" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = DCDCD5D32D8DD28400C041C1 /* UniPass */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DCDCD5D62D8DD28400C041C1 /* UniPass */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				DCAE89922D8F400C005CD862 /* Exceptions for "UniPass" folder in "UniPass" target */,
+			);
 			path = UniPass;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,9 @@
 				DEVELOPMENT_TEAM = 3LGLXWA468;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UniPass/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -291,6 +307,9 @@
 				DEVELOPMENT_TEAM = 3LGLXWA468;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UniPass/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

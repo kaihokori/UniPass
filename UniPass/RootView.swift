@@ -22,6 +22,12 @@ struct RootView: View {
                         EditProfileView(navigationPath: $navigationPath)
                     case .friendProfile(let friend):
                         ProfileView(navigationPath: $navigationPath, profileToDisplay: friend)
+                    case .meetups:
+                        MeetupsView(navigationPath: $navigationPath)
+                    case .createMeetup:
+                        CreateMeetupView(navigationPath: $navigationPath)
+                    case .interaction:
+                        InteractionView(navigationPath: $navigationPath)
                     }
                 }
         }

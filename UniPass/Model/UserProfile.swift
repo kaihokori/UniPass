@@ -7,7 +7,6 @@
 
 import Foundation
 import CloudKit
-import UIKit
 
 struct UserProfile: Equatable, Hashable {
     var uuid: String
@@ -18,6 +17,30 @@ struct UserProfile: Equatable, Hashable {
     var bio: String
     var hometown: String
     var socialScore: Int
-    var profileImage: UIImage?
+    var profileImage: PlatformImage?
     var friends: [String]
+    
+    static func == (lhs: UserProfile, rhs: UserProfile) -> Bool {
+            return lhs.uuid == rhs.uuid &&
+                   lhs.name == rhs.name &&
+                   lhs.studying == rhs.studying &&
+                   lhs.year == rhs.year &&
+                   lhs.tags == rhs.tags &&
+                   lhs.bio == rhs.bio &&
+                   lhs.hometown == rhs.hometown &&
+                   lhs.socialScore == rhs.socialScore &&
+                   lhs.friends == rhs.friends
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(uuid)
+            hasher.combine(name)
+            hasher.combine(studying)
+            hasher.combine(year)
+            hasher.combine(tags)
+            hasher.combine(bio)
+            hasher.combine(hometown)
+            hasher.combine(socialScore)
+            hasher.combine(friends)
+        }
 }

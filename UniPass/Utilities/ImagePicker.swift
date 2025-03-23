@@ -5,6 +5,8 @@
 //  Created by Kyle Graham on 22/3/2025.
 //
 
+#if os(iOS)
+
 import SwiftUI
 import PhotosUI
 
@@ -18,15 +20,15 @@ struct ImagePicker: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var config = PHPickerConfiguration()
-        config.selectionLimit = 1 // Limit to one selection
-        config.filter = .images // Only images are allowed
+        config.selectionLimit = 1
+        config.filter = .images
         let picker = PHPickerViewController(configuration: config)
         picker.delegate = context.coordinator
         return picker
     }
 
     func updateUIViewController(_ uiViewController: PHPickerViewController, context: Context) {
-        // No updates needed for this case
+        // No updates needed
     }
 
     class Coordinator: NSObject, PHPickerViewControllerDelegate {
@@ -40,18 +42,47 @@ struct ImagePicker: UIViewControllerRepresentable {
 
         func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
             if let result = results.first {
-                // Get selected asset
-                result.itemProvider.loadDataRepresentation(forTypeIdentifier: "public.image") { (data, error) in
+                result.itemProvider.loadDataRepresentation(forTypeIdentifier: "public.image") { data, error in
                     DispatchQueue.main.async {
                         if let data = data {
                             self.selectedImageData = data
                         }
-                        self.isPresented = false // Dismiss picker
+                        self.isPresented = false
                     }
                 }
             } else {
-                self.isPresented = false // Dismiss picker if nothing is selected
+                self.isPresented = false
             }
         }
     }
 }
+
+#elseif os(macOS)
+
+import SwiftUI
+import AppKit
+import UniformTypeIdentifiers
+
+struct ImagePicker: View {
+    @Binding var isPresented: Bool
+    @Binding var selectedImageData: Data?
+    
+    var body: some View {
+        EmptyView()
+            .onAppear {
+                let panel = NSOpenPanel()
+                panel.allowedContentTypes = [.image]
+                panel.canChooseDirectories = false
+                panel.allowsMultipleSelection = false
+                
+                if panel.runModal() == .OK, let url = panel.url,
+                   let data = try? Data(contentsOf: url) {
+                    selectedImageData = data
+                }
+                
+                isPresented = false
+            }
+    }
+}
+
+#endif
