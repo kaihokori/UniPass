@@ -11,6 +11,7 @@ struct OnboardingView: View {
     @EnvironmentObject var profileManager: ProfileManager
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var discoveredManager: DiscoveredManager
+    @EnvironmentObject var bluetoothManager: BluetoothManager
     @StateObject private var locationViewModel = LocationViewModel()
 
     @State private var currentIndex = 0
@@ -113,6 +114,12 @@ struct OnboardingView: View {
                 .ignoresSafeArea()
                 .onAppear {
                     multipeerManager.startScanning()
+                    
+                    bluetoothManager.start(uuid: profileManager.uuid) { discoveredUUID in
+                        guard profileManager.isProfileCreated else { return }
+                        discoveredManager.handleNewUUID(discoveredUUID)
+                        profileManager.addFriendIfNeeded(uuid: discoveredUUID)
+                    }
                 }
         }
         #elseif os(macOS)
@@ -135,6 +142,12 @@ struct OnboardingView: View {
                 .frame(minWidth: 800, minHeight: 600)
                 .onAppear {
                     multipeerManager.startScanning()
+                    
+                    bluetoothManager.start(uuid: profileManager.uuid) { discoveredUUID in
+                        guard profileManager.isProfileCreated else { return }
+                        discoveredManager.handleNewUUID(discoveredUUID)
+                        profileManager.addFriendIfNeeded(uuid: discoveredUUID)
+                    }
                 }
         }
         #endif

@@ -12,6 +12,7 @@ struct UniPassApp: App {
     @StateObject var profileManager = ProfileManager.shared
     @StateObject var multipeerManager = MultipeerManager()
     @StateObject var discoveredManager = DiscoveredManager()
+    @StateObject var bluetoothManager = BluetoothManager()
 
     var body: some Scene {
         WindowGroup {
@@ -34,6 +35,12 @@ struct UniPassApp: App {
                     .ignoresSafeArea()
                     .onAppear {
                         multipeerManager.startScanning()
+                        
+                        bluetoothManager.start(uuid: profileManager.uuid) { discoveredUUID in
+                            guard profileManager.isProfileCreated else { return }
+                            discoveredManager.handleNewUUID(discoveredUUID)
+                            profileManager.addFriendIfNeeded(uuid: discoveredUUID)
+                        }
                     }
             } else {
                 OnboardingView()

@@ -15,7 +15,10 @@
 		DC32BCF92D92001700A8EED3 /* Exceptions for "UniPass" folder in "UniPass (macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Utilities/WrappingHStack.swift,
+				Utilities/Broadcasting/Bluetooth/BluetoothAdvertiser.swift,
+				Utilities/Broadcasting/Bluetooth/BluetoothManager.swift,
+				Utilities/Broadcasting/Bluetooth/BluetoothScanner.swift,
+				Utilities/Components/WrappingHStack.swift,
 			);
 			target = DC971F1E2D914059000483DC /* UniPass (macOS) */;
 		};
@@ -399,7 +402,8 @@
 				INFOPLIST_FILE = UniPass/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = UniPass;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users, even when the app is not open.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to broadcast your presence so nearby students can discover you and connect. ";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -439,7 +443,8 @@
 				INFOPLIST_FILE = UniPass/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = UniPass;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
-				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users, even when the app is not open.";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "This app uses Bluetooth to broadcast your presence so nearby students can discover you and connect. ";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
