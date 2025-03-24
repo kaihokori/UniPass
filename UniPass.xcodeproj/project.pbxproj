@@ -270,6 +270,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = UniPass/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = UniPass;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -308,6 +310,8 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = UniPass/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = UniPass;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
