@@ -21,15 +21,23 @@ struct MeetupRowView: View {
                     .font(.headline)
                 Spacer()
                 HStack(spacing: -15) {
-                    ForEach(meetup.participants.prefix(5), id: \.self) { uuid in
+                    ForEach(Array(meetup.participants.prefix(5)), id: \.self) { uuid in
                         if let user = getUserProfile(uuid) {
                             if let image = user.profileImage {
+                                #if os(iOS)
                                 Image(uiImage: image)
                                     .resizable()
                                     .scaledToFill()
                                     .frame(width: 36, height: 36)
                                     .clipShape(Circle())
                                     .overlay(Circle().stroke(Color.purple, lineWidth: 2))
+                                #elseif os(macOS)
+                                Circle()
+                                    .fill(Color.green)
+                                    .frame(width: 36, height: 36)
+                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(Color.purple, lineWidth: 2))
+                                #endif
                             } else {
                                 Circle()
                                     .fill(Color.green)

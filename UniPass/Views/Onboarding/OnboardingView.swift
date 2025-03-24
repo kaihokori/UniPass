@@ -93,6 +93,7 @@ struct OnboardingView: View {
             }
             .padding(.bottom, 20)
         }
+        #if os(iOS)
         .fullScreenCover(isPresented: $showMainView) {
             RootView()
                 .environmentObject(profileManager)
@@ -114,6 +115,29 @@ struct OnboardingView: View {
                     multipeerManager.startScanning()
                 }
         }
+        #elseif os(macOS)
+        .sheet(isPresented: $showMainView) {
+            RootView()
+                .environmentObject(profileManager)
+                .environmentObject(multipeerManager)
+                .environmentObject(discoveredManager)
+                .onChange(of: multipeerManager.discoveredUUIDs) { _, uuids in
+                    guard profileManager.isProfileCreated else {
+                        print("⏳ Skipping discovered UUIDs; profile not ready")
+                        return
+                    }
+
+                    for uuid in uuids {
+                        discoveredManager.handleNewUUID(uuid)
+                        profileManager.addFriendIfNeeded(uuid: uuid)
+                    }
+                }
+                .frame(minWidth: 800, minHeight: 600)
+                .onAppear {
+                    multipeerManager.startScanning()
+                }
+        }
+        #endif
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(isPresented: $showingImagePicker, selectedImageData: $selectedImageData)
         }
