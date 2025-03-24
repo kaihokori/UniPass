@@ -26,11 +26,9 @@ class ProfileManager: ObservableObject {
     private var pendingFriendAdditions: [String] = []
     static let shared = ProfileManager()
 
-    // ✅ Explicit container ID
     private let container = CKContainer(identifier: "iCloud.dev.kylegraham.unipass")
     private let uuidKey = "userUUID"
     
-    // Will be set after container loads
     private var publicDB: CKDatabase {
         container.publicCloudDatabase
     }
@@ -57,7 +55,6 @@ class ProfileManager: ObservableObject {
     }
 
     private func loadOrCreateUUID() {
-        // Testing: Reset UUID for
         // UserDefaults.standard.removeObject(forKey: uuidKey)
 
         // uuid = "D67EA808-518A-4070-8A11-2E7D2508C626"
@@ -98,7 +95,6 @@ class ProfileManager: ObservableObject {
                     print("✅ Profile created in CloudKit: \(record?.recordID.recordName ?? "Unknown ID")")
                     self.isProfileCreated = true
 
-                    // 🔁 Retry until it's available
                     self.retryFetchProfileFromCloudKit()
                 }
             }
@@ -199,7 +195,6 @@ class ProfileManager: ObservableObject {
                         
                         self.isProfileCreated = true
                         
-                        // ✅ Process any queued friend additions
                         for uuid in self.pendingFriendAdditions {
                             self.addFriendIfNeeded(uuid: uuid)
                         }
@@ -259,7 +254,6 @@ class ProfileManager: ObservableObject {
 
         let operation = CKQueryOperation(query: query)
 
-        // ✅ Add 'friends' so you can support second-degree later, and ensure all fields are fetched
         operation.desiredKeys = [
             "uuid",
             "name",
@@ -317,12 +311,11 @@ class ProfileManager: ObservableObject {
                     print("✅ Loaded \(profiles.count) friend profiles:")
                     profiles.forEach { print("   • \($0.name) (\($0.uuid))") }
                     
-                    // Collect all second-degree UUIDs
                     let secondDegreeUUIDs = profiles
                         .flatMap { $0.friends }
                         .filter { friendUUID in
                             friendUUID != self.uuid &&  // not you
-                            !self.friendsProfiles.contains(where: { $0.uuid == friendUUID }) // not already a direct friend
+                            !self.friendsProfiles.contains(where: { $0.uuid == friendUUID })
                         }
 
                     let uniqueSecondDegreeUUIDs = Array(Set(secondDegreeUUIDs))
@@ -411,7 +404,6 @@ class ProfileManager: ObservableObject {
     func addFriendIfNeeded(uuid: String) {
         guard uuid != self.uuid else { return }
 
-        // Ensure profile is available and CloudKit has indexed it
         guard isProfileCreated, currentProfile != nil else {
             print("🕒 Delaying friend addition, profile not ready.")
             if !pendingFriendAdditions.contains(uuid) {
@@ -463,17 +455,13 @@ class ProfileManager: ObservableObject {
                             } else {
                                 print("✅ Added \(uuid) as a new friend and saved to CloudKit.")
 
-                                // Update local copy
                                 self.currentProfile?.friends.append(uuid)
                                 self.fetchFriendsProfiles(friendUUIDs: self.currentProfile!.friends)
 
-                                // Log interaction
                                 self.logInteraction(with: uuid)
 
-                                // Add friend visually
                                 self.fetchFriendProfile(uuid: uuid)
 
-                                // Make mutual
                                 let friendPredicate = NSPredicate(format: "uuid == %@", uuid)
                                 let friendQuery = CKQuery(recordType: "Profile", predicate: friendPredicate)
 
@@ -564,13 +552,11 @@ class ProfileManager: ObservableObject {
                 switch result {
                 case .success:
                     if let profile = newProfile {
-                        // Avoid duplicates
                         if !self.friendsProfiles.contains(where: { $0.uuid == profile.uuid }) {
                             self.friendsProfiles.append(profile)
                             print("✨ Added new friend to UI: \(profile.name)")
                         }
 
-                        // ✅ NEW: Fetch 2° connections
                         let secondDegreeCandidates = profile.friends.filter { friendUUID in
                             friendUUID != self.uuid &&                                // not you
                             !self.friendsProfiles.contains(where: { $0.uuid == friendUUID }) && // not already 1°
@@ -622,7 +608,6 @@ class ProfileManager: ObservableObject {
                         return
                     }
 
-                    // 📝 Update text fields
                     record["name"] = name as NSString
                     record["studying"] = studying as NSString
                     record["year"] = year as NSString
@@ -630,7 +615,6 @@ class ProfileManager: ObservableObject {
                     record["bio"] = bio as NSString
                     record["hometown"] = hometown as NSString
 
-                    // 📸 Updated image handling with logs
                     if let selectedImage = image {
                         print("📸 Got image, attempting to save...")
 
@@ -662,7 +646,6 @@ class ProfileManager: ObservableObject {
                     print("Hometown:", hometown)
                     print("Photo:", record["photo"] != nil ? "✅ Asset present" : "❌ No image")
                     
-                    // 💾 Save updated record
                     self.publicDB.save(record) { savedRecord, saveError in
                         DispatchQueue.main.async {
                             if let saveError = saveError {
@@ -721,7 +704,7 @@ class ProfileManager: ObservableObject {
                     print("✅ Loaded \(meetups.count) relevant meetups")
 
                     self.currentMeetup = meetups.first(where: { $0.participants.contains(self.uuid) })
-                    self.usersInMeetups = allParticipants // ✅
+                    self.usersInMeetups = allParticipants
                     self.allFetchedMeetups = meetups
                     
                     completion(meetups)
@@ -766,7 +749,6 @@ class ProfileManager: ObservableObject {
                 } else {
                     print("✅ Meetup created successfully with ID: \(savedRecord?.recordID.recordName ?? "Unknown")")
 
-                    // 🔁 Delay to allow CloudKit indexing
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                         self.shouldRefreshMeetups = true
                     }
@@ -835,7 +817,6 @@ class ProfileManager: ObservableObject {
    
     func joinMeetup(meetup: Meetup, force: Bool = false, completion: @escaping (Bool, Bool) -> Void) {
         if !force && willLeavingCurrentMeetupDeleteIt() {
-            // ⚠️ Deletion confirmation needed
             completion(false, true)
             return
         }
@@ -1036,7 +1017,6 @@ class ProfileManager: ObservableObject {
 
                             self.interactionLog = log.sorted(by: { $0.date > $1.date })
 
-                            // ✅ Add this:
                             print("✅ Fetched interaction log with \(log.count) record(s).")
 
                         case .failure(let error):

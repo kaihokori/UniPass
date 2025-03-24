@@ -322,7 +322,6 @@ struct GraphView: View {
             }
             try? await Task.sleep(nanoseconds: 500_000_000)
 
-            // ✅ Rebuild visible UUIDs before showing nodes
             visibleFirstDegreeUUIDs = Set(profileManager.friendsProfiles.map { $0.uuid })
 
             withAnimation(.easeOut(duration: 1)) {
@@ -335,7 +334,6 @@ struct GraphView: View {
             }
             try? await Task.sleep(nanoseconds: 500_000_000)
 
-            // ✅ Same for second-degree
             visibleSecondDegreeUUIDs = Set(profileManager.secondDegreeProfiles.map { $0.uuid })
 
             withAnimation(.easeOut(duration: 1)) {

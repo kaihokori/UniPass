@@ -18,7 +18,6 @@ class MultipeerManager: NSObject, ObservableObject {
     @Published var discoveredUUIDs: [String] = []
 
     override init() {
-        // Use the same UUID as in ProfileManager
         let myUUID = UserDefaults.standard.string(forKey: "userUUID") ?? UUID().uuidString
         UserDefaults.standard.set(myUUID, forKey: "userUUID")
         myPeerID = MCPeerID(displayName: myUUID)
@@ -57,7 +56,7 @@ extension MultipeerManager: MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     }
 
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        // no-op for now
+        //
     }
 
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
@@ -77,7 +76,6 @@ extension MultipeerManager: MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         }
     }
 
-    // unused but required:
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {}
     func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {}
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
