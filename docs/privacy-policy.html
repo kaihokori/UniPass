@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta lang="en" />
     <title>UniPass - Privacy Policy</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
     <body>
       <div class="header">
         <img src="logo.png" alt="UniPass Logo" />
@@ -48,17 +48,29 @@
 
         <h2>Data Storage</h2>
         <p>
-          All data is stored in Apple's CloudKit. At this stage of development,
-          data is not encrypted at rest in a private database. This means your
-          profile and interaction data may be accessible in plain form within
-          the database.
+          All user data is stored in Apple's CloudKit service. CloudKit encrypts
+          data both in transit and at rest, using Apple’s standard security
+          practices. While some profile data is stored in a public database to
+          enable social discovery, access is limited to users of the app and is
+          not shared with third parties.
+        </p>
+
+        <h2>Security</h2>
+        <p>
+          We rely on Apple's CloudKit infrastructure to securely store and
+          transmit your data. Apple encrypts data at rest and during
+          transmission using industry-standard protocols. At this time, we do
+          not implement additional encryption or cryptographic algorithms within
+          the app.
         </p>
 
         <h2>Sharing of Information</h2>
         <p>
-          We do not share your personal data with third parties. Your profile is
-          only visible to other users when you come into proximity and exchange
-          UUIDs via peer-to-peer communication.
+          We do not share your personal data with third parties. Only your UUID
+          is exchanged via peer-to-peer discovery. Profile information is then
+          fetched securely from CloudKit using that UUID. No sensitive or
+          identifying information is transmitted directly over local
+          connections.
         </p>
 
         <h2>Your Rights</h2>
@@ -77,5 +89,4 @@
         </p>
       </div>
     </body>
-  </body>
 </html>
