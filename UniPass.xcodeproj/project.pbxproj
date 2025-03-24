@@ -7,10 +7,18 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		DC971F1F2D914059000483DC /* UniPass (macOS).app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "UniPass (macOS).app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DCDCD5D42D8DD28400C041C1 /* UniPass.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UniPass.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		DC971F2F2D9140CA000483DC /* Exceptions for "UniPass (macOS)" folder in "UniPass (macOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"UniPass--macOS--Info.plist",
+			);
+			target = DC971F1E2D914059000483DC /* UniPass (macOS) */;
+		};
 		DCAE89922D8F400C005CD862 /* Exceptions for "UniPass" folder in "UniPass" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -21,6 +29,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		DC971F202D914059000483DC /* UniPass (macOS) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				DC971F2F2D9140CA000483DC /* Exceptions for "UniPass (macOS)" folder in "UniPass (macOS)" target */,
+			);
+			path = "UniPass (macOS)";
+			sourceTree = "<group>";
+		};
 		DCDCD5D62D8DD28400C041C1 /* UniPass */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -32,6 +48,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		DC971F1C2D914059000483DC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DCDCD5D12D8DD28400C041C1 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -46,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				DCDCD5D62D8DD28400C041C1 /* UniPass */,
+				DC971F202D914059000483DC /* UniPass (macOS) */,
 				DCDCD5D52D8DD28400C041C1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -54,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				DCDCD5D42D8DD28400C041C1 /* UniPass.app */,
+				DC971F1F2D914059000483DC /* UniPass (macOS).app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,6 +86,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		DC971F1E2D914059000483DC /* UniPass (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DC971F2B2D91405D000483DC /* Build configuration list for PBXNativeTarget "UniPass (macOS)" */;
+			buildPhases = (
+				DC971F1B2D914059000483DC /* Sources */,
+				DC971F1C2D914059000483DC /* Frameworks */,
+				DC971F1D2D914059000483DC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				DC971F202D914059000483DC /* UniPass (macOS) */,
+			);
+			name = "UniPass (macOS)";
+			packageProductDependencies = (
+			);
+			productName = "UniPass (macOS)";
+			productReference = DC971F1F2D914059000483DC /* UniPass (macOS).app */;
+			productType = "com.apple.product-type.application";
+		};
 		DCDCD5D32D8DD28400C041C1 /* UniPass */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DCDCD5E22D8DD28600C041C1 /* Build configuration list for PBXNativeTarget "UniPass" */;
@@ -93,6 +140,9 @@
 				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
 				TargetAttributes = {
+					DC971F1E2D914059000483DC = {
+						CreatedOnToolsVersion = 16.2;
+					};
 					DCDCD5D32D8DD28400C041C1 = {
 						CreatedOnToolsVersion = 16.2;
 					};
@@ -113,11 +163,19 @@
 			projectRoot = "";
 			targets = (
 				DCDCD5D32D8DD28400C041C1 /* UniPass */,
+				DC971F1E2D914059000483DC /* UniPass (macOS) */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		DC971F1D2D914059000483DC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DCDCD5D22D8DD28400C041C1 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -128,6 +186,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		DC971F1B2D914059000483DC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DCDCD5D02D8DD28400C041C1 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -138,6 +203,70 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		DC971F2C2D91405D000483DC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "UniPass (macOS)/UniPass__macOS_.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"UniPass (macOS)/Preview Content\"";
+				DEVELOPMENT_TEAM = 3LGLXWA468;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "UniPass--macOS--Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.kylegraham.UniPass--macOS-";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		DC971F2D2D91405D000483DC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "UniPass (macOS)/UniPass__macOS_.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"UniPass (macOS)/Preview Content\"";
+				DEVELOPMENT_TEAM = 3LGLXWA468;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "UniPass--macOS--Info.plist";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "This app uses Bluetooth to discover nearby users";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "This app uses the local network to connect with nearby users";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.kylegraham.UniPass--macOS-";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 		DCDCD5E02D8DD28600C041C1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -287,7 +416,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.kylegraham.unipass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -327,7 +456,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = dev.kylegraham.unipass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -340,6 +469,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		DC971F2B2D91405D000483DC /* Build configuration list for PBXNativeTarget "UniPass (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DC971F2C2D91405D000483DC /* Debug */,
+				DC971F2D2D91405D000483DC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		DCDCD5CF2D8DD28400C041C1 /* Build configuration list for PBXProject "UniPass" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
