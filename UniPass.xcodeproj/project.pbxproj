@@ -12,10 +12,10 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		DC971F2F2D9140CA000483DC /* Exceptions for "UniPass (macOS)" folder in "UniPass (macOS)" target */ = {
+		DC32BCF92D92001700A8EED3 /* Exceptions for "UniPass" folder in "UniPass (macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"UniPass--macOS--Info.plist",
+				Utilities/WrappingHStack.swift,
 			);
 			target = DC971F1E2D914059000483DC /* UniPass (macOS) */;
 		};
@@ -31,9 +31,6 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DC971F202D914059000483DC /* UniPass (macOS) */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				DC971F2F2D9140CA000483DC /* Exceptions for "UniPass (macOS)" folder in "UniPass (macOS)" target */,
-			);
 			path = "UniPass (macOS)";
 			sourceTree = "<group>";
 		};
@@ -41,6 +38,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				DCAE89922D8F400C005CD862 /* Exceptions for "UniPass" folder in "UniPass" target */,
+				DC32BCF92D92001700A8EED3 /* Exceptions for "UniPass" folder in "UniPass (macOS)" target */,
 			);
 			path = UniPass;
 			sourceTree = "<group>";
@@ -412,7 +410,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.kylegraham.unipass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;
@@ -452,7 +450,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.kylegraham.unipass;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = NO;

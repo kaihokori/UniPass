@@ -14,4 +14,5 @@ struct Meetup: Identifiable {
     var location: String
     var date: Date
     var participants: [String]
+    let tags: [String]
 }

@@ -81,7 +81,6 @@ extension MultipeerManager: MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
     func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: Error?) {}
     
     func startScanning() {
-        print("STARTED")
         advertiser.startAdvertisingPeer()
         browser.startBrowsingForPeers()
     }

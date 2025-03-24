@@ -671,7 +671,7 @@ class ProfileManager: ObservableObject {
         let query = CKQuery(recordType: "Meetup", predicate: predicate)
 
         let operation = CKQueryOperation(query: query)
-        operation.desiredKeys = ["title", "description", "location", "date", "participants"]
+        operation.desiredKeys = ["title", "description", "location", "date", "participants", "tags"]
 
         var meetups: [Meetup] = []
         var allParticipants: Set<String> = []
@@ -688,7 +688,8 @@ class ProfileManager: ObservableObject {
                     description: record["description"] as? String ?? "",
                     location: record["location"] as? String ?? "Unknown",
                     date: record["date"] as? Date ?? Date(),
-                    participants: participants
+                    participants: participants,
+                    tags: record["tags"] as? [String] ?? []
                 )
                 meetups.append(meetup)
 
@@ -721,7 +722,7 @@ class ProfileManager: ObservableObject {
         publicDB.add(operation)
     }
     
-    func createMeetup(title: String, description: String, location: String, date: Date, completion: @escaping (Bool) -> Void) {
+    func createMeetup(title: String, description: String, location: String, date: Date, tags: [String], completion: @escaping (Bool) -> Void) {
         guard !title.isEmpty, !location.isEmpty else {
             print("❌ Title and location must not be empty")
             completion(false)
@@ -740,6 +741,7 @@ class ProfileManager: ObservableObject {
         record["location"] = location as NSString
         record["date"] = date as NSDate
         record["participants"] = [uuid] as NSArray
+        record["tags"] = tags as NSArray
 
         publicDB.save(record) { savedRecord, error in
             DispatchQueue.main.async {

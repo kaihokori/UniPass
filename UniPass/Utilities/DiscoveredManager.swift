@@ -12,7 +12,6 @@ class DiscoveredManager: ObservableObject {
     @Published var recentlyFoundProfiles: [UserProfile] = []
 
     func handleNewUUID(_ uuid: String) {
-        // Avoid duplicates
         guard !recentlyFoundProfiles.contains(where: { $0.uuid == uuid }) else { return }
 
         let predicate = NSPredicate(format: "uuid == %@", uuid)

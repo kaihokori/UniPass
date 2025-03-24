@@ -42,7 +42,8 @@ struct CreateMeetupView: View {
                                 title: title,
                                 description: description,
                                 location: location,
-                                date: date
+                                date: date,
+                                tags: selectedTags
                             ) { success in
                                 if success {
                                     navigationPath.removeLast()

@@ -70,6 +70,45 @@ struct MeetupRowView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
             }
+            
+            WrappingHStack(alignment: .leading, horizontalSpacing: 8, verticalSpacing: 8) {
+                ForEach(meetup.tags, id: \.self) { tag in
+                    let isSharedTag = getUserProfile(currentUserUUID)?.tags.contains(tag) == true
+                    Text(tag)
+                        .font(.caption)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 15)
+                                .fill(isSharedTag ? Color.accentColor : AppColor.gray5)
+                        )
+                        .foregroundColor(isSharedTag ? .white : .primary)
+                }
+                ForEach(meetup.tags, id: \.self) { tag in
+                    let isSharedTag = getUserProfile(currentUserUUID)?.tags.contains(tag) == true
+                    Text(tag)
+                        .font(.caption)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 15)
+                                .fill(isSharedTag ? Color.accentColor : AppColor.gray5)
+                        )
+                        .foregroundColor(isSharedTag ? .white : .primary)
+                }
+                ForEach(meetup.tags, id: \.self) { tag in
+                    let isSharedTag = getUserProfile(currentUserUUID)?.tags.contains(tag) == true
+                    Text(tag)
+                        .font(.caption)
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(
+                            RoundedRectangle(cornerRadius: 15)
+                                .fill(isSharedTag ? Color.accentColor : AppColor.gray5)
+                        )
+                        .foregroundColor(isSharedTag ? .white : .primary)
+                }
+            }
 
             if let onJoin = onJoin, !meetup.participants.contains(currentUserUUID) {
                 Button(action: onJoin) {
