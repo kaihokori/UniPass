@@ -36,7 +36,19 @@ class ProfileManager: ObservableObject {
     }
 
     @Published var uuid: String = ""
-    @Published var isProfileCreated: Bool = false
+    @Published var isProfileCreated: Bool = false {
+        didSet {
+            if isProfileCreated {
+                print("🚀 Profile is ready — retrying pending friend additions...")
+
+                for uuid in pendingFriendAdditions {
+                    addFriendIfNeeded(uuid: uuid)
+                }
+
+                pendingFriendAdditions.removeAll()
+            }
+        }
+    }
     @Published var profileImage: PlatformImage?
 
     init() {
@@ -48,6 +60,9 @@ class ProfileManager: ObservableObject {
         // Testing: Reset UUID for
         // UserDefaults.standard.removeObject(forKey: uuidKey)
 
+        // uuid = "D67EA808-518A-4070-8A11-2E7D2508C626"
+        // print("🧪 Using hardcoded UUID: \(uuid)")
+        
         if let savedUUID = UserDefaults.standard.string(forKey: uuidKey) {
             uuid = savedUUID
             print("Loaded existing UUID: \(uuid)")
@@ -181,6 +196,9 @@ class ProfileManager: ObservableObject {
                     if let profile = fetchedProfile {
                         self.currentProfile = profile
                         print("✅ Loaded profile: \(profile.name)")
+                        
+                        self.isProfileCreated = true
+                        
                         // ✅ Process any queued friend additions
                         for uuid in self.pendingFriendAdditions {
                             self.addFriendIfNeeded(uuid: uuid)
@@ -484,6 +502,8 @@ class ProfileManager: ObservableObject {
                                                         print("❌ Failed to save mutual friendship: \(saveError.localizedDescription)")
                                                     } else {
                                                         print("✅ Mutual friendship saved — they now have you as a friend too.")
+                                                        
+                                                        self.logReverseInteraction(ownerUUID: uuid, peerUUID: self.uuid)
                                                     }
                                                 }
                                             }
@@ -916,6 +936,21 @@ class ProfileManager: ObservableObject {
                 print("❌ Failed to log interaction: \(error.localizedDescription)")
             } else {
                 print("📌 Logged interaction with \(peerUUID)")
+            }
+        }
+    }
+    
+    private func logReverseInteraction(ownerUUID: String, peerUUID: String) {
+        let record = CKRecord(recordType: "Interaction")
+        record["ownerUUID"] = ownerUUID as NSString
+        record["peerUUID"] = peerUUID as NSString
+        record["date"] = Date() as NSDate
+
+        publicDB.save(record) { saved, error in
+            if let error = error {
+                print("❌ Failed to log reverse interaction: \(error.localizedDescription)")
+            } else {
+                print("📌 Logged reverse interaction: \(ownerUUID) met \(peerUUID)")
             }
         }
     }

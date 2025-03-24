@@ -85,7 +85,8 @@ struct MeetupsView: View {
                             }
                         }
                     )
-                    .padding()
+                    .padding(.horizontal)
+                    .padding(.top)
                 }
             }
             Spacer()

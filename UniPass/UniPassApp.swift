@@ -20,15 +20,24 @@ struct UniPassApp: App {
                     .environmentObject(profileManager)
                     .environmentObject(multipeerManager)
                     .environmentObject(discoveredManager)
-                    .onChange(of: multipeerManager.discoveredUUIDs) {
-                        for uuid in multipeerManager.discoveredUUIDs {
+                    .onChange(of: multipeerManager.discoveredUUIDs) { _, uuids in
+                        guard profileManager.isProfileCreated else {
+                            print("⏳ Skipping discovered UUIDs; profile not ready")
+                            return
+                        }
+
+                        for uuid in uuids {
                             discoveredManager.handleNewUUID(uuid)
                             profileManager.addFriendIfNeeded(uuid: uuid)
                         }
                     }
                     .ignoresSafeArea()
+                    .onAppear {
+                        multipeerManager.startScanning()
+                    }
             } else {
                 OnboardingView()
+                    .background(AppColor.systemBackground)
                     .environmentObject(profileManager)
                     .environmentObject(multipeerManager)
                     .environmentObject(discoveredManager)

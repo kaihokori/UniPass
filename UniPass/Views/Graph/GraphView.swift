@@ -105,6 +105,20 @@ struct GraphView: View {
                     }
             }
             
+            if profileManager.friendsProfiles.isEmpty && profileManager.secondDegreeProfiles.isEmpty {
+                VStack {
+                    Spacer()
+                    Spacer()
+                    Text("Looking for Nearby Connections")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.bottom, 40)
+                    Spacer()
+                }
+                .transition(.opacity)
+                .animation(.easeInOut, value: profileManager.friendsProfiles)
+            }
+            
             VStack {
                 HStack {
                     Spacer()

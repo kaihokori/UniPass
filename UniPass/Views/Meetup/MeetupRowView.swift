@@ -29,14 +29,13 @@ struct MeetupRowView: View {
                                     .scaledToFill()
                                     .frame(width: 36, height: 36)
                                     .clipShape(Circle())
-                                    .shadow(radius: 1)
+                                    .overlay(Circle().stroke(Color.purple, lineWidth: 2))
                             } else {
                                 Circle()
                                     .fill(Color.green)
                                     .frame(width: 36, height: 36)
                                     .overlay(Text(String(user.name.prefix(1))).foregroundColor(.white))
-                                    .overlay(Circle().stroke(Color.white, lineWidth: 2))
-                                    .shadow(radius: 1)
+                                    .overlay(Circle().stroke(Color.purple, lineWidth: 2))
                             }
                         }
                     }

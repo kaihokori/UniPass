@@ -17,6 +17,8 @@ struct ProfileView: View {
     @State private var selectedTags: [String] = []
     @State private var showDeleteWarning = false
     @State private var meetupToLeave: Meetup?
+    @State private var meetupToJoin: Meetup?
+    @State private var showJoinWarning = false
     private let uuidKey = "userUUID"
     let profileToDisplay: UserProfile?
     var effectiveProfile: UserProfile? {
@@ -85,7 +87,7 @@ struct ProfileView: View {
                 .offset(y: 60)
                 
                 if let profile = effectiveProfile, let image = profile.profileImage {
-                    let isGoingToMeetup = profileManager.currentMeetup?.participants.contains(profile.uuid) ?? false
+                    let isGoingToMeetup = profileManager.usersInMeetups.contains(profile.uuid)
                     #if os(iOS)
                     Image(uiImage: image)
                         .resizable()
@@ -109,16 +111,17 @@ struct ProfileView: View {
                         .shadow(radius: 5)
                         .offset(y: 165)
                     #endif
-                } else {
+                } else if let profile = effectiveProfile {
+                    let isGoingToMeetup = profileManager.usersInMeetups.contains(profile.uuid)
                     Circle()
                         .fill(Color.green)
                         .overlay(
-                            Text(String(profileManager.currentProfile?.name.prefix(1) ?? " "))
+                            Text(String(profile.name.prefix(1)))
                                 .font(.title)
                                 .foregroundColor(.white)
                         )
                         .frame(width: 130, height: 130)
-                        .overlay(Circle().stroke(Color.white, lineWidth: 2))
+                        .overlay(Circle().stroke(isGoingToMeetup ? Color.purple : Color.white, lineWidth: 4))
                         .shadow(radius: 5)
                         .offset(y: 165)
                 }
@@ -173,11 +176,14 @@ struct ProfileView: View {
                                        profileManager.secondDegreeProfiles.first(where: { $0.uuid == uuid })
                             },
                             onJoin: {
-                                profileManager.joinMeetup(meetup: meetup) { success, _ in
+                                profileManager.joinMeetup(meetup: meetup) { success, needsConfirmation in
                                     if success {
                                         profileManager.fetchMeetups(
                                             for: [profileManager.uuid, profile.uuid]
                                         ) { _ in }
+                                    } else if needsConfirmation {
+                                        meetupToJoin = meetup
+                                        showJoinWarning = true
                                     }
                                 }
                             },
@@ -273,6 +279,20 @@ struct ProfileView: View {
             Button("Cancel", role: .cancel) {}
         } message: { meetup in
             Text("You're the last one going to \"\(meetup.title)\". Leaving will delete the meetup.")
+        }
+        .alert("Join New Meetup?", isPresented: $showJoinWarning, presenting: meetupToJoin) { meetup in
+            Button("Join and Delete Old", role: .destructive) {
+                profileManager.joinMeetup(meetup: meetup, force: true) { success, _ in
+                    if success {
+                        if let profile = effectiveProfile {
+                            profileManager.fetchMeetups(for: [profileManager.uuid, profile.uuid]) { _ in }
+                        }
+                    }
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { meetup in
+            Text("Joining \"\(meetup.title)\" will delete your current meetup since you're the last one in it. Continue?")
         }
     }
     
