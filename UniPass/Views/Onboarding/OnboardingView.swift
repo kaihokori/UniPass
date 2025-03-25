@@ -9,8 +9,6 @@ import SwiftUI
 
 struct OnboardingView: View {
     @EnvironmentObject var profileManager: ProfileManager
-    @EnvironmentObject var multipeerManager: MultipeerManager
-    @EnvironmentObject var discoveredManager: DiscoveredManager
     @StateObject private var locationViewModel = LocationViewModel()
 
     @State private var currentIndex = 0
