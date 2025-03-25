@@ -11,11 +11,9 @@ struct OnboardingView: View {
     @EnvironmentObject var profileManager: ProfileManager
     @EnvironmentObject var multipeerManager: MultipeerManager
     @EnvironmentObject var discoveredManager: DiscoveredManager
-    @EnvironmentObject var bluetoothManager: BluetoothManager
     @StateObject private var locationViewModel = LocationViewModel()
 
     @State private var currentIndex = 0
-    @State private var showMainView = false
     @State private var showingImagePicker = false
     
     @State private var name = ""
@@ -94,63 +92,6 @@ struct OnboardingView: View {
             }
             .padding(.bottom, 20)
         }
-        #if os(iOS)
-        .fullScreenCover(isPresented: $showMainView) {
-            RootView()
-                .environmentObject(profileManager)
-                .environmentObject(multipeerManager)
-                .environmentObject(discoveredManager)
-                .onChange(of: multipeerManager.discoveredUUIDs) { _, uuids in
-                    guard profileManager.isProfileCreated else {
-                        print("⏳ Skipping discovered UUIDs; profile not ready")
-                        return
-                    }
-
-                    for uuid in uuids {
-                        discoveredManager.handleNewUUID(uuid)
-                        profileManager.addFriendIfNeeded(uuid: uuid)
-                    }
-                }
-                .ignoresSafeArea()
-                .onAppear {
-                    multipeerManager.startScanning()
-                    
-                    bluetoothManager.start(uuid: profileManager.uuid) { discoveredUUID in
-                        guard profileManager.isProfileCreated else { return }
-                        discoveredManager.handleNewUUID(discoveredUUID)
-                        profileManager.addFriendIfNeeded(uuid: discoveredUUID)
-                    }
-                }
-        }
-        #elseif os(macOS)
-        .sheet(isPresented: $showMainView) {
-            RootView()
-                .environmentObject(profileManager)
-                .environmentObject(multipeerManager)
-                .environmentObject(discoveredManager)
-                .onChange(of: multipeerManager.discoveredUUIDs) { _, uuids in
-                    guard profileManager.isProfileCreated else {
-                        print("⏳ Skipping discovered UUIDs; profile not ready")
-                        return
-                    }
-
-                    for uuid in uuids {
-                        discoveredManager.handleNewUUID(uuid)
-                        profileManager.addFriendIfNeeded(uuid: uuid)
-                    }
-                }
-                .frame(minWidth: 800, minHeight: 600)
-                .onAppear {
-                    multipeerManager.startScanning()
-                    
-                    bluetoothManager.start(uuid: profileManager.uuid) { discoveredUUID in
-                        guard profileManager.isProfileCreated else { return }
-                        discoveredManager.handleNewUUID(discoveredUUID)
-                        profileManager.addFriendIfNeeded(uuid: discoveredUUID)
-                    }
-                }
-        }
-        #endif
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(isPresented: $showingImagePicker, selectedImageData: $selectedImageData)
         }
@@ -225,9 +166,7 @@ struct OnboardingView: View {
             )
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                multipeerManager.startScanning()
                 UserDefaults.standard.set(true, forKey: "hasSeenOnboarding")
-                showMainView = true
             }
         } else {
             currentIndex += 1

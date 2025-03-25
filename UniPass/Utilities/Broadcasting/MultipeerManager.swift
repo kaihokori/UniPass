@@ -84,4 +84,9 @@ extension MultipeerManager: MCNearbyServiceAdvertiserDelegate, MCNearbyServiceBr
         advertiser.startAdvertisingPeer()
         browser.startBrowsingForPeers()
     }
+    
+    func stopScanning() {
+        advertiser.stopAdvertisingPeer()
+        browser.stopBrowsingForPeers()
+    }
 }

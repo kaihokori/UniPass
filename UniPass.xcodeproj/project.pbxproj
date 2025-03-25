@@ -15,9 +15,6 @@
 		DC32BCF92D92001700A8EED3 /* Exceptions for "UniPass" folder in "UniPass (macOS)" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Utilities/Broadcasting/Bluetooth/BluetoothAdvertiser.swift,
-				Utilities/Broadcasting/Bluetooth/BluetoothManager.swift,
-				Utilities/Broadcasting/Bluetooth/BluetoothScanner.swift,
 				Utilities/Components/WrappingHStack.swift,
 			);
 			target = DC971F1E2D914059000483DC /* UniPass (macOS) */;

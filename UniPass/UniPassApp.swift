@@ -12,7 +12,8 @@ struct UniPassApp: App {
     @StateObject var profileManager = ProfileManager.shared
     @StateObject var multipeerManager = MultipeerManager()
     @StateObject var discoveredManager = DiscoveredManager()
-    @StateObject var bluetoothManager = BluetoothManager()
+    @StateObject var bluetoothAdvertiser = BluetoothAdvertiser()
+    @StateObject var bluetoothScanner = BluetoothScanner()
 
     var body: some Scene {
         WindowGroup {
@@ -21,25 +22,37 @@ struct UniPassApp: App {
                     .environmentObject(profileManager)
                     .environmentObject(multipeerManager)
                     .environmentObject(discoveredManager)
-                    .onChange(of: multipeerManager.discoveredUUIDs) { _, uuids in
+                    .onChange(of: bluetoothScanner.discoveredUUIDs) { _, uuids in
                         guard profileManager.isProfileCreated else {
-                            print("⏳ Skipping discovered UUIDs; profile not ready")
+                            print("⏳ Skipping CB-discovered UUIDs; profile not ready")
                             return
                         }
 
                         for uuid in uuids {
                             discoveredManager.handleNewUUID(uuid)
                             profileManager.addFriendIfNeeded(uuid: uuid)
+                            print("✅ CoreBluetooth: Attempting to add friend from CB scan → \(uuid)")
                         }
                     }
                     .ignoresSafeArea()
                     .onAppear {
-                        multipeerManager.startScanning()
+                        print("🟢 App appeared – Starting peer discovery")
                         
-                        bluetoothManager.start(uuid: profileManager.uuid) { discoveredUUID in
-                            guard profileManager.isProfileCreated else { return }
-                            discoveredManager.handleNewUUID(discoveredUUID)
-                            profileManager.addFriendIfNeeded(uuid: discoveredUUID)
+                        multipeerManager.startScanning()
+                        bluetoothScanner.startScanning()
+                        
+                        NotificationCenter.default.addObserver(forName: UIApplication.willResignActiveNotification, object: nil, queue: .main) { _ in
+                            print("🔙 App going to background")
+                            multipeerManager.stopScanning()
+                            bluetoothScanner.stopScanning()
+                            bluetoothAdvertiser.startAdvertising()
+                        }
+
+                        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { _ in
+                            print("🔛 App returned to foreground")
+                            bluetoothAdvertiser.stopAdvertising()
+                            multipeerManager.startScanning()
+                            bluetoothScanner.startScanning()
                         }
                     }
             } else {

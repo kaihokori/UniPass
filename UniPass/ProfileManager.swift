@@ -25,6 +25,8 @@ class ProfileManager: ObservableObject {
     @Published var allFetchedMeetups: [Meetup] = []
     private var pendingFriendAdditions: [String] = []
     static let shared = ProfileManager()
+    private var friendAdditionQueue = DispatchQueue(label: "com.unipass.friendAdditionQueue")
+    private var enqueuedFriendUUIDs: Set<String> = []
 
     private let container = CKContainer(identifier: "iCloud.dev.kylegraham.unipass")
     private let uuidKey = "userUUID"
@@ -57,8 +59,8 @@ class ProfileManager: ObservableObject {
     private func loadOrCreateUUID() {
         // UserDefaults.standard.removeObject(forKey: uuidKey)
 
-        // uuid = "D67EA808-518A-4070-8A11-2E7D2508C626"
-        // print("🧪 Using hardcoded UUID: \(uuid)")
+//         uuid = "9AD604BC-367F-4511-A9B5-C4D653853C96"
+//         print("🧪 Using hardcoded UUID: \(uuid)")
         
         if let savedUUID = UserDefaults.standard.string(forKey: uuidKey) {
             uuid = savedUUID
@@ -114,6 +116,45 @@ class ProfileManager: ObservableObject {
                 }
             }
         }
+    }
+    
+    func resolveFullUUID(from partial: String, completion: @escaping (String?) -> Void) {
+        let predicate = NSPredicate(format: "uuid BEGINSWITH %@", partial)
+        let query = CKQuery(recordType: "Profile", predicate: predicate)
+
+        let operation = CKQueryOperation(query: query)
+        operation.resultsLimit = 1
+        operation.desiredKeys = ["uuid"]
+
+        var fullUUID: String?
+
+        operation.recordMatchedBlock = { _, result in
+            switch result {
+            case .success(let record):
+                fullUUID = record["uuid"] as? String
+            case .failure(let error):
+                print("❌ Failed to match partial UUID: \(error.localizedDescription)")
+            }
+        }
+
+        operation.queryResultBlock = { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    if let uuid = fullUUID {
+                        print("🔍 Resolved partial UUID \(partial) to full UUID: \(uuid)")
+                    } else {
+                        print("⚠️ No match found for partial UUID: \(partial)")
+                    }
+                    completion(fullUUID)
+                case .failure(let error):
+                    print("❌ Error in resolving partial UUID: \(error.localizedDescription)")
+                    completion(nil)
+                }
+            }
+        }
+
+        publicDB.add(operation)
     }
     
     private func checkiCloudStatus() {
@@ -404,19 +445,62 @@ class ProfileManager: ObservableObject {
     func addFriendIfNeeded(uuid: String) {
         guard uuid != self.uuid else { return }
 
+        guard !enqueuedFriendUUIDs.contains(uuid) else {
+            print("🔁 \(uuid) is already in the friend-addition queue")
+            return
+        }
+
+        enqueuedFriendUUIDs.insert(uuid)
+
+        friendAdditionQueue.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            DispatchQueue.main.async {
+                self?.performFriendAddition(uuid: uuid)
+            }
+        }
+    }
+
+    private func performFriendAddition(uuid: String) {
+        guard uuid != self.uuid else { return }
+
         guard isProfileCreated, currentProfile != nil else {
             print("🕒 Delaying friend addition, profile not ready.")
             if !pendingFriendAdditions.contains(uuid) {
                 pendingFriendAdditions.append(uuid)
             }
+            enqueuedFriendUUIDs.remove(uuid)
             return
         }
 
-        if currentProfile!.friends.contains(uuid) {
-            print("👥 \(uuid) is already a friend.")
-            return
+        let checkTargetPredicate = NSPredicate(format: "uuid == %@", uuid)
+        let checkTargetQuery = CKQuery(recordType: "Profile", predicate: checkTargetPredicate)
+
+        let checkOp = CKQueryOperation(query: checkTargetQuery)
+        checkOp.resultsLimit = 1
+
+        var targetExists = false
+
+        checkOp.recordMatchedBlock = { _, result in
+            if case .success = result {
+                targetExists = true
+            }
         }
 
+        checkOp.queryResultBlock = { _ in
+            DispatchQueue.main.async {
+                guard targetExists else {
+                    print("⚠️ No profile exists for UUID: \(uuid). Skipping friend addition.")
+                    self.enqueuedFriendUUIDs.remove(uuid)
+                    return
+                }
+
+                self.continueFriendAddition(uuid: uuid)
+            }
+        }
+
+        self.publicDB.add(checkOp)
+    }
+    
+    private func continueFriendAddition(uuid: String) {
         let predicate = NSPredicate(format: "uuid == %@", self.uuid)
         let query = CKQuery(recordType: "Profile", predicate: predicate)
 
@@ -424,11 +508,18 @@ class ProfileManager: ObservableObject {
             switch result {
             case .failure(let error):
                 print("❌ Failed to fetch current user's profile: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.enqueuedFriendUUIDs.remove(uuid)
+                }
+
             case .success(let (matchResults, _)):
                 guard let firstMatch = matchResults.first else {
-                    print("❌ No matching profile record found (still indexing?). Queuing...")
-                    if !self.pendingFriendAdditions.contains(uuid) {
-                        self.pendingFriendAdditions.append(uuid)
+                    print("❌ No matching profile record found. Queuing again...")
+                    DispatchQueue.main.async {
+                        if !self.pendingFriendAdditions.contains(uuid) {
+                            self.pendingFriendAdditions.append(uuid)
+                        }
+                        self.enqueuedFriendUUIDs.remove(uuid)
                     }
                     return
                 }
@@ -438,10 +529,17 @@ class ProfileManager: ObservableObject {
                 switch recordResult {
                 case .failure(let error):
                     print("❌ Error loading matched record: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        self.enqueuedFriendUUIDs.remove(uuid)
+                    }
+
                 case .success(let record):
                     var friends = record["friends"] as? [String] ?? []
                     if friends.contains(uuid) {
                         print("👥 \(uuid) is already in CloudKit friends list.")
+                        DispatchQueue.main.async {
+                            self.enqueuedFriendUUIDs.remove(uuid)
+                        }
                         return
                     }
 
@@ -450,6 +548,8 @@ class ProfileManager: ObservableObject {
 
                     self.publicDB.save(record) { _, error in
                         DispatchQueue.main.async {
+                            self.enqueuedFriendUUIDs.remove(uuid)
+
                             if let error = error {
                                 print("❌ Failed to save updated friends list: \(error.localizedDescription)")
                             } else {
@@ -457,47 +557,48 @@ class ProfileManager: ObservableObject {
 
                                 self.currentProfile?.friends.append(uuid)
                                 self.fetchFriendsProfiles(friendUUIDs: self.currentProfile!.friends)
-
                                 self.logInteraction(with: uuid)
-
                                 self.fetchFriendProfile(uuid: uuid)
+                                self.mutuallyAddFriendBack(uuid: uuid)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-                                let friendPredicate = NSPredicate(format: "uuid == %@", uuid)
-                                let friendQuery = CKQuery(recordType: "Profile", predicate: friendPredicate)
+    private func mutuallyAddFriendBack(uuid: String) {
+        let predicate = NSPredicate(format: "uuid == %@", uuid)
+        let query = CKQuery(recordType: "Profile", predicate: predicate)
 
-                                self.publicDB.fetch(withQuery: friendQuery, inZoneWith: nil, desiredKeys: ["friends"], resultsLimit: 1) { result in
-                                    switch result {
-                                    case .failure(let error):
-                                        print("❌ Failed to fetch friend's record for mutual add: \(error.localizedDescription)")
-                                    case .success(let (matchResults, _)):
-                                        guard let first = matchResults.first else {
-                                            print("⚠️ Friend record not found")
-                                            return
-                                        }
+        publicDB.fetch(withQuery: query, inZoneWith: nil, desiredKeys: ["friends"], resultsLimit: 1) { result in
+            switch result {
+            case .failure(let error):
+                print("❌ Failed to fetch friend's record for mutual add: \(error.localizedDescription)")
 
-                                        let (_, recordResult) = first
-                                        switch recordResult {
-                                        case .failure(let error):
-                                            print("❌ Failed to load friend's record: \(error.localizedDescription)")
-                                        case .success(let friendRecord):
-                                            var friendList = friendRecord["friends"] as? [String] ?? []
-                                            if !friendList.contains(self.uuid) {
-                                                friendList.append(self.uuid)
-                                                friendRecord["friends"] = friendList as NSArray
+            case .success(let (matchResults, _)):
+                guard let first = matchResults.first else {
+                    print("⚠️ Friend record not found")
+                    return
+                }
 
-                                                self.publicDB.save(friendRecord) { _, saveError in
-                                                    if let saveError = saveError {
-                                                        print("❌ Failed to save mutual friendship: \(saveError.localizedDescription)")
-                                                    } else {
-                                                        print("✅ Mutual friendship saved — they now have you as a friend too.")
-                                                        
-                                                        self.logReverseInteraction(ownerUUID: uuid, peerUUID: self.uuid)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                let (_, recordResult) = first
+                switch recordResult {
+                case .failure(let error):
+                    print("❌ Failed to load friend's record: \(error.localizedDescription)")
+                case .success(let record):
+                    var friends = record["friends"] as? [String] ?? []
+                    if !friends.contains(self.uuid) {
+                        friends.append(self.uuid)
+                        record["friends"] = friends as NSArray
+
+                        self.publicDB.save(record) { _, error in
+                            if let error = error {
+                                print("❌ Failed to save mutual friendship: \(error.localizedDescription)")
+                            } else {
+                                print("✅ Mutual friendship saved (they now have you too)")
+                                self.logReverseInteraction(ownerUUID: uuid, peerUUID: self.uuid)
                             }
                         }
                     }
